@@ -1,90 +1,66 @@
-import time
-import requests, os, dotenv
+import urllib.error
+import urllib.parse
+import urllib.request
 
-dotenv.load_dotenv()
+class _HTTPStatusCode:
+    OK = 200
+    BAD_REQUEST = 400
+    UNAUTHORIZED = 401
+    FORBIDDEN = 403
+    NOT_FOUND = 404
 
-class SendNotify:
-    def __init__(self, status: bool) -> None:
+class UnauthorizedError(BaseException):
+    pass
+
+class EmptyMessageError(BaseException):
+    pass
+
+class Telenotify:
+    def __init__(self, status: bool, bot_token: str, chat_id: int | str) -> None:
+        """
+        ## Discription:
+        That's module for send simple messages or notifies to telegram account
+
+        ## Args:
+        - `status`: [bool] - Uses for turn on on off the notifies.
+        - `bot_token`: [str] - Token of your bot.
+        - `chat_id`: [str | int] - Your telegram account id.
+
+        ## Fast start:
+        ``` python
+        from telenotify import Telenotify
+
+        TOKEN = '123456789:JhskaJHGHjsad...'
+        CHAT_ID = 132456789
+        status = True
+
+        tnotify = Telenotify(status=status, bot_token=TOKEN, chat_id=CHAT_ID)
+        ```
+        """
         self.status = status
-        self.TOKEN = os.getenv('BOT_TOKEN')
-        self.CHAT_ID = os.getenv('CHAT_ID')
-
-    def send_message(self, title: str, message: str) -> int:
+        self.SEND_MESSAGE_URL = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+        self.CHAT_ID = chat_id
+        
+    def send_message(self, message: str | int = '') -> _HTTPStatusCode:
+        """
+        ## Discription:
+        Sends default, markdown formated message.
+        ## Args:
+        - message: Optional[str] - Text of message.
+        """
         if self.status:
-            msg = f'*{title}*\n{message}'
-            url = f"https://api.telegram.org/bot{self.TOKEN}/sendMessage"
-            payload = {
-                'chat_id': self.CHAT_ID,
-                'text': msg,
-                'parse_mode': 'Markdown'
-            }
+            if message == '':
+                raise EmptyMessageError("Message can't be empty")
+            try:
+                payload = dict(
+                    chat_id=self.CHAT_ID,
+                    text=message,
+                    parse_mode='Markdown'
+                    )
+                data = urllib.parse.urlencode(payload).encode('ascii')
+                urllib.request.urlopen(self.SEND_MESSAGE_URL, data=data)
+                return _HTTPStatusCode.OK
             
-            resp = requests.post(url, json=payload)
-            return resp.status_code
-        else:
-            pass
+            except urllib.error.HTTPError:
+                raise UnauthorizedError('Probably missing chat with bot or invalid token/chat_id', _HTTPStatusCode.UNAUTHORIZED)   
     
-    
-    def bot_status(self, message: str):
-        status_code = self.send_message('🔔Bot status!', message)
-        return status_code
-    
-    def bought(self, message: str):
-        status_code = self.send_message('📉Buy!', message)
-        return status_code
-
-    def sold(self, message: str):
-        status_code = self.send_message('📈Sell!', message)
-        return status_code
-
-    def error(self, message: str):
-        status_code = self.send_message('❌Error!', message)
-        return status_code
-
-    def warning(self, message: str):
-        status_code = self.send_message('⚠️Warning!', message)
-        return status_code
-    
-    def send_file(self, file_path: str, title: str = None, caption: str = None):
-        if self.status:
-            url = f"https://api.telegram.org/bot{self.TOKEN}/sendDocument"
-            data = {'chat_id': self.CHAT_ID}
-            if caption and title:
-
-                msg = f'*{title}*\n{caption}'
-                data['caption'] = msg
-                data['parse_mode'] = 'Markdown'
-
-            files = {'document': open(file_path, 'rb')}
-            
-            resp = requests.post(url, files=files, data=data)
-            return resp.status_code
-        else:
-            pass
-
-class Pooling:
-    def __init__(self) -> None:
-        self.TOKEN = os.getenv('BOT_TOKEN')
-        self.CHAT_ID = os.getenv('CHAT_ID')
-
-
-    def get_updates(self, offset=None):
-        url = f"https://api.telegram.org/bot{self.TOKEN}/getUpdates"
-        params = {'timeout': 100,
-                  'offset': offset}
-        resp = requests.get(url, params=params)
-        return resp.json()
-    
-    def update(self, func):
-        offset = None
-        while True:
-            updates = self.get_updates(offset)
-            for update in updates['result']:
-                if 'message' in update:
-                    text = update['message']['text']
-                    if text.lower() == "/profit":
-                        func()
-                    offset = update['update_id'] + 1
-            time.sleep(1)
-
-polling = Pooling()
