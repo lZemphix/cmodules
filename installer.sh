@@ -44,8 +44,8 @@ cat <<EOF > confmt/bot_config.json
     "send_notify": $send_notify
 }
 EOF
-echo -e "\e[e32mConfig ready\e[0m"
-echo -e "\e[e33mSetting .env\e[0m"
+echo -e "\e[32mConfig ready\e[0m"
+echo -e "\e[33mSetting .env\e[0m"
 
 read -p "Enter your bybit account type (UNIFIED recomendated): " ACCOUNT_TYPE
 read -p "Enter your bybit api key (https://www.bybit.com/app/user/api-management): " API_KEY
@@ -72,7 +72,7 @@ echo '{
         "sell_lines": []
 }' >> confmt/trade_journal.json
 
-read -p "Enter your trade bot name (cmx for example)" cont_name
+read -p "Enter your trade bot name (cmx for example): " cont_name
 
 echo "#!/bin/bash
 sudo docker start $cont_name" >> bot_starter.sh
@@ -82,7 +82,7 @@ sudo docker stop $cont_name" >> bot_stoper.sh
 chmod +x bot_starter.sh
 chmod +x bot_stoper.sh
 
-sudo docker start -d --name \
+sudo docker create -d --name \
         $cont_name \
         -v $(pwd)/confmt/.env:/bot/.env \
         -v $(pwd)/confmt/bot_config.json:/bot/src/config/bot_config.json \
@@ -90,4 +90,4 @@ sudo docker start -d --name \
         zemphix/trade_bot
 echo -e "Use \e[33m./bot_starter.sh\e[0m for activate bot
 Use \e[33m./bot_stoper.sh\e[0m for stop bot"
-echo "\e[32mSuccess! Your bot activated!\e[0m"
+echo -e "\e[32mSuccess! Your bot activated!\e[0m"
