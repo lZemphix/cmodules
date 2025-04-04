@@ -19,7 +19,7 @@ echo "Docker Installation successful"
 echo "Bot installing"
 
 echo "Image installing"
-docker pull zemphix/trade_bot
+sudo docker pull zemphix/trade_bot
 echo "Image installed"
 
 mkdir confmt
@@ -76,14 +76,14 @@ echo '{
 read -p "Enter your trade bot name (cmx for example)" cont_name
 
 echo "#!/bin/bash
-docker start $cont_name" >> bot_starter.sh
+sudo docker start $cont_name" >> bot_starter.sh
 echo "#!/bin/bash
-docker stop $cont_name" >> bot_stoper.sh
+sudo docker stop $cont_name" >> bot_stoper.sh
 
 chmod +x bot_starter.sh
 chmod +x bot_stoper.sh
 
-docker run -d --name \
+sudo docker start -d --name \
         $cont_name \
         -v $(pwd)/confmt/.env:/bot/.env \
         -v $(pwd)/confmt/bot_config.json:/bot/src/config/bot_config.json \
