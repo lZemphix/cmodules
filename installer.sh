@@ -1,7 +1,6 @@
 #!/bin/bash
-
-echo "Installation started!"
-echo "Docker install"
+echo -e "\e[33mInstallation started!\e[0m"
+echo -e "\e[33mDocker installation\e[0m"
 sudo apt-get update
 sudo apt-get install ca-certificates curl
 sudo install -m 0755 -d /etc/apt/keyrings
@@ -14,18 +13,18 @@ echo \
   sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
 sudo apt-get update
 sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-echo "Docker Installation successful"
+echo -e "\e[32mDocker Installation successful\e[0m"
 
-echo "Bot installing"
+echo -e "\e[33mBot installing\e[0m"
 
-echo "Image installing"
+echo -e "\e[32mImage installing\e[0m"
 sudo docker pull zemphix/trade_bot
-echo "Image installed"
+echo -e "\e[33mImage installed\e[0m"
 
 mkdir confmt
 
-echo "Setting bot config..."
-echo "If you don't know what a parameter is responsible for, enter the recommended one"
+echo -e "\e[33mSetting bot config...\e[0m"
+echo -e "\e[4;33mIf you don't know what a parameter is responsible for, enter the recommended one\e[0m"
 
 read -p "Enter the symbol (BTCUSDT recommended): " symbol
 read -p "Enter interval (5 recomendated): " interval
@@ -45,8 +44,8 @@ cat <<EOF > confmt/bot_config.json
     "send_notify": $send_notify
 }
 EOF
-echo "Config ready"
-echo "Setting .env"
+echo -e "\e[e32mConfig ready\e[0m"
+echo -e "\e[e33mSetting .env\e[0m"
 
 read -p "Enter your bybit account type (UNIFIED recomendated): " ACCOUNT_TYPE
 read -p "Enter your bybit api key (https://www.bybit.com/app/user/api-management): " API_KEY
@@ -62,9 +61,9 @@ API_KEY=$API_KEY
 BOT_TOKEN=$BOT_TOKEN 
 CHAT_ID=$CHAT_ID
 EOF
-echo ".env ready"
+echo -e "\e[32m.env ready\e[0m"
 
-echo "Other files initializating"
+echo -e "\e[33mOther files initializating\e[0m"
 echo '{
         "laps": 0,
         "last_order": 0,
@@ -89,6 +88,6 @@ sudo docker start -d --name \
         -v $(pwd)/confmt/bot_config.json:/bot/src/config/bot_config.json \
         -v $(pwd)/confmt/trade_journal.json:/bot/src/src/trade_journal.json \
         zemphix/trade_bot
-echo "Use ./bot_starter.sh for activate bot
-Use ./bot_stoper.sh for stop bot"
-echo "Success! Your bot activated!"
+echo -e "Use \e[33m./bot_starter.sh\e[0m for activate bot
+Use \e[33m./bot_stoper.sh\e[0m for stop bot"
+echo "\e[32mSuccess! Your bot activated!\e[0m"
